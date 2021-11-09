@@ -17,7 +17,7 @@ const menuQ = () => {
   return new Promise((resolve, reject) => {
     try {
       // (readable, writeable from readline interface)
-      rl.question('Your choice: ', answer => {
+      rl.question('Your choice: ', (answer) => {
         resolve(answer);
       });
     } catch (error) {
@@ -26,45 +26,30 @@ const menuQ = () => {
     }
   });
 };
-let milkQ = () => {
+const milkQ = () => {
   return new Promise((resolve, reject) => {
-    rl.question('How many cups of milk to add? ', answer => {
-      resolve(answer);
-    });
+    try {
+      rl.question('How many cups of milk to add? ', (answer) => {
+        resolve(answer);
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
-};
-
-// User questions
-const userOptions = async mochaObject => {
-  let milkPicked = await milkQ();
-  let milkChoice = parseInt(milkPicked);
-  var espPicked = await espressoQ();
-  let espChoice = parseInt(espPicked);
-  // If peppermint mocha
-  if (mochaObject instanceof PeppermintMocha) {
-    let pepPicked = await peppermintQ();
-    let pepChoice = parseInt(pepPicked);
-    mochaObject.peppermintSyrup = pepChoice;
-  }
-  mochaObject.milk = milkChoice;
-  mochaObject.shot = espChoice;
-  mochaObject.prepare();
 };
 
 const espressoQ = () => {
   return new Promise((resolve, reject) => {
-    rl.question('How many shots of espresso to add? ', answer => {
-      resolve(answer);
-    });
+    try {
+      rl.question('How many shots of espresso to add? ', (answer) => {
+        resolve(answer);
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 };
-const peppermintQ = () => {
-  return new Promise((resolve, reject) => {
-    rl.question('How many shots of peppermint to add? ', answer => {
-      resolve(answer);
-    });
-  });
-};
+
 // Create parent class Mocha
 class Mocha {
   constructor() {
@@ -94,6 +79,7 @@ class DarkChocolateMocha extends Mocha {
     this.chocolateType = 'Dark';
   }
 }
+
 // inherits from Mocha
 class PeppermintMocha extends Mocha {
   constructor() {
@@ -111,41 +97,34 @@ class PeppermintMocha extends Mocha {
   }
 }
 
-const main = () => {
-  let menuChoice = 0;
-  const buildMocha = async () => {
-    do {
-      const optionPicked = await showMenu();
-      menuChoice = parseInt(optionPicked);
-      switch (menuChoice) {
-        case 0: {
-          break;
-        }
-        case 1:
-          let whiteMochaVar = 0;
-          const whiteMocha = new WhiteChocolateMocha();
-          await userOptions(whiteMocha);
-          break;
-        case 2:
-          const darkMocha = new DarkChocolateMocha();
-          await userOptions(darkMocha);
-          break;
-        case 3:
-          const peppermintMocha = new PeppermintMocha();
-          await userOptions(peppermintMocha);
-          break;
-        default: {
-          console.log('Option invalid, please choose from menu.');
-          break;
-        }
-      }
-    } while (menuChoice != 0);
-    // end readline process
-    rl.close();
-  };
-  buildMocha();
+const peppermintQ = () => {
+  return new Promise((resolve, reject) => {
+    try {
+      rl.question('How many shots of peppermint to add? ', (answer) => {
+        resolve(answer);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
-main();
+
+// User questions
+const userOptions = async (mochaObject) => {
+  const milkPicked = await milkQ();
+  const milkChoice = parseInt(milkPicked);
+  const espPicked = await espressoQ();
+  const espChoice = parseInt(espPicked);
+  // If peppermint mocha
+  if (mochaObject instanceof PeppermintMocha) {
+    const pepPicked = await peppermintQ();
+    const pepChoice = parseInt(pepPicked);
+    mochaObject.peppermintSyrup = pepChoice;
+  }
+  mochaObject.milk = milkChoice;
+  mochaObject.shot = espChoice;
+  mochaObject.prepare();
+};
 
 // display menu and return selected menu item
 const showMenu = async () => {
@@ -159,3 +138,41 @@ const showMenu = async () => {
   const qMenu = await menuQ();
   return qMenu;
 };
+
+const main = () => {
+  let menuChoice = 0;
+  const buildMocha = async () => {
+    do {
+      const optionPicked = await showMenu();
+      menuChoice = parseInt(optionPicked);
+      switch (menuChoice) {
+        case 0: {
+          break;
+        }
+        case 1: {
+          const whiteMocha = new WhiteChocolateMocha();
+          await userOptions(whiteMocha);
+          break;
+        }
+        case 2: {
+          const darkMocha = new DarkChocolateMocha();
+          await userOptions(darkMocha);
+          break;
+        }
+        case 3: {
+          const peppermintMocha = new PeppermintMocha();
+          await userOptions(peppermintMocha);
+          break;
+        }
+        default: {
+          console.log('Option invalid, please choose from menu.');
+          break;
+        }
+      }
+    } while (menuChoice != 0);
+    // end readline process
+    rl.close();
+  };
+  buildMocha();
+};
+main();
